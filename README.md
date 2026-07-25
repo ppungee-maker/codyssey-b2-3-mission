@@ -1,6 +1,6 @@
-# B2-3 「AI 기반 소셜 미디어 콘텐츠 자동 생성」 — 모범답안
+# B2-3 「AI 기반 소셜 미디어 콘텐츠 자동 생성」
 
-> 미션 원문은 [`문제.md`](문제.md) 참고. 주제: **"친환경 텀블러 신제품 출시"**.
+> 미션 원문은 [`problem.md`](problem.md) 참고. 주제: **"친환경 텀블러 신제품 출시"**.
 > 사용 도구: Make(자동화), Notion(저장), Claude/OpenAI API(플랫폼별 텍스트), 네이토(이미지).
 
 > ⚠️ **진행 상태**: 이미지 관련 산출물(대표 이미지, 보너스 A/B)은 **전부 실제 생성
@@ -14,7 +14,7 @@
 | 워크플로우 구조 스크린샷 | `captures/make/` | ⬜ |
 | 단계별 역할·연결 구조 문서 | §2 | ✅ |
 | 3개 플랫폼 텍스트 | §4 (설계 완료) | ⏳ 실응답 대기 |
-| 대표 이미지 1장 이상 | `images/final/01-대표이미지-친환경텀블러.png` | ✅ |
+| 대표 이미지 1장 이상 | `images/final/01-main-image-eco-tumbler.png` | ✅ |
 | 노션 저장(플랫폼별 구분) | §3 | 🔧 |
 | 프로젝트 개요·팀역할·작업요약 | §5 | ✅ |
 | 프롬프트 템플릿 문서(설계+수정과정) | §4 | ✅ 이미지 / ⏳ 텍스트 |
@@ -25,7 +25,7 @@
 
 ## 1. 대표 이미지
 
-![대표 이미지](images/final/01-대표이미지-친환경텀블러.png)
+![대표 이미지](images/final/01-main-image-eco-tumbler.png)
 
 네이토(`gpt-image-1-mini`, `1024x1024`, low, 1,667 vt)로 생성.
 
@@ -106,11 +106,11 @@ aesthetic, no text anywhere in the image
 
 **이미지 A(친근한)** — 야외, 자연광, 손에 든 캐주얼 컷:
 
-![A 친근한 버전](images/bonus-ab/A-친근한버전.png)
+![A 친근한 버전](images/bonus-ab/A-friendly-version.png)
 
 **이미지 B(전문적인)** — 스튜디오, 다크 그라디언트, 미니멀 카탈로그 컷:
 
-![B 전문적인 버전](images/bonus-ab/B-전문적인버전.png)
+![B 전문적인 버전](images/bonus-ab/B-professional-version.png)
 
 | 변수 | A(친근한) | B(전문적인) |
 |---|---|---|
