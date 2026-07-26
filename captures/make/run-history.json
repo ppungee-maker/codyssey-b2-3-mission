@@ -1,0 +1,226 @@
+{
+  "scenarioId": 5763583,
+  "scenarioName": "B2-3 소셜 콘텐츠 자동 생성",
+  "statusCode": {
+    "1": "성공",
+    "3": "오류"
+  },
+  "runs": [
+    {
+      "timestamp": "2026-07-26T00:08:44.026Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 436,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.782Z",
+      "status": 3,
+      "operations": 5,
+      "duration": 1850,
+      "transfer": 6988,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.777Z",
+      "status": 3,
+      "operations": 7,
+      "duration": 4317,
+      "transfer": 17155,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.771Z",
+      "status": 3,
+      "operations": 5,
+      "duration": 1644,
+      "transfer": 6989,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.766Z",
+      "status": 3,
+      "operations": 5,
+      "duration": 4913,
+      "transfer": 7006,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.759Z",
+      "status": 3,
+      "operations": 5,
+      "duration": 1629,
+      "transfer": 7045,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.751Z",
+      "status": 1,
+      "operations": 8,
+      "duration": 4665,
+      "transfer": 23821,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.747Z",
+      "status": 3,
+      "operations": 5,
+      "duration": 1679,
+      "transfer": 7018,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.735Z",
+      "status": 3,
+      "operations": 7,
+      "duration": 4921,
+      "transfer": 18374,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.726Z",
+      "status": 3,
+      "operations": 7,
+      "duration": 3885,
+      "transfer": 16207,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:20.718Z",
+      "status": 1,
+      "operations": 8,
+      "duration": 4671,
+      "transfer": 23270,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:08:16.581Z",
+      "status": 1,
+      "operations": 8,
+      "duration": 4596,
+      "transfer": 24099,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:05:11.048Z",
+      "status": 1,
+      "operations": 8,
+      "duration": 1763,
+      "transfer": 17452,
+      "instant": false,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:58.726Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 336,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:40.749Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 269,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:34.669Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 391,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:34.665Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 311,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:13.845Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 466,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:04:11.639Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 213,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:03:39.176Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 321,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:03:11.673Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 265,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:02:52.779Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 294,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:02:35.601Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 598,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    },
+    {
+      "timestamp": "2026-07-26T00:01:44.021Z",
+      "status": 3,
+      "operations": 3,
+      "duration": 317,
+      "transfer": 264,
+      "instant": true,
+      "type": "auto"
+    }
+  ]
+}

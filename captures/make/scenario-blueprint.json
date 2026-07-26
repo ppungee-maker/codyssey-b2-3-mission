@@ -1,0 +1,357 @@
+{
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {},
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "주제 입력 (웹훅)"
+        }
+      },
+      "parameters": {
+        "hook": 2619358,
+        "maxResults": 1
+      }
+    },
+    {
+      "id": 2,
+      "mapper": {
+        "name": "대표이미지",
+        "scope": "roundtrip",
+        "value": "https://raw.githubusercontent.com/ppungee-maker/codyssey-b2-3-mission/main/images/final/01-main-image-eco-tumbler.png"
+      },
+      "module": "util:SetVariable2",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "대표 이미지 (Router 밖 1회)"
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 3,
+      "mapper": null,
+      "module": "builtin:BasicRouter",
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 10,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent",
+                "data": "{\"contents\": [{\"parts\": [{\"text\": \"역할: 소셜 콘텐츠 자동생성 파이프라인의 인스타그램 텍스트 생성 단계.\\n출력 형식: 캡션 본문 → 빈 줄 → 해시태그 한 줄. 그 외 머리말·설명·따옴표 금지.\\n캡션 규칙: 첫 줄은 8~14자 훅, 전체 3~4문장·300자 이내, 이모지 2~3개(문장 끝에만),\\n          친근한 구어체(해요체).\\n해시태그 규칙: 10개 내외, 한글 6개 + 영문 4개, 브랜드명 1개 포함, '#' 로 시작하고 공백 구분.\\n금지: 의학적·환경 효과 과장('완전 무해', '탄소 제로'), 가격 할인 단정, 없는 스펙 창작.\\n주제: {{1.topic}}\"}]}], \"generationConfig\": {\"temperature\": 0.7}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "x-goog-api-key",
+                    "value": "<REDACTED>"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -300,
+                  "name": "AI 텍스트 생성 — 인스타그램"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            },
+            {
+              "id": 11,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://api.notion.com/v1/pages",
+                "data": "{\"parent\": {\"database_id\": \"3a82f355-a7e2-81e4-a320-fec69e32d481\"}, \"properties\": {\"제목\": {\"title\": [{\"text\": {\"content\": \"{{1.topic}} — 인스타그램\"}}]}, \"주제\": {\"rich_text\": [{\"text\": {\"content\": \"{{1.topic}}\"}}]}, \"플랫폼\": {\"select\": {\"name\": \"인스타그램\"}}, \"콘텐츠\": {\"rich_text\": [{\"text\": {\"content\": \"{{replace(10.data.candidates[1].content.parts[1].text; newline; \"\\n\")}}\"}}]}, \"이미지\": {\"files\": [{\"name\": \"hero.png\", \"type\": \"external\", \"external\": {\"url\": \"https://raw.githubusercontent.com/ppungee-maker/codyssey-b2-3-mission/main/images/final/01-main-image-eco-tumbler.png\"}}]}, \"생성일시\": {\"date\": {\"start\": \"{{formatDate(now; \"YYYY-MM-DD\")}}\"}}, \"글자수\": {\"number\": {{length(10.data.candidates[1].content.parts[1].text)}}}}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer <REDACTED>"
+                  },
+                  {
+                    "name": "Notion-Version",
+                    "value": "2022-06-28"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -300,
+                  "name": "Notion 저장 — 인스타그램"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 12,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent",
+                "data": "{\"contents\": [{\"parts\": [{\"text\": \"역할: 소셜 콘텐츠 자동생성 파이프라인의 블로그 텍스트 생성 단계.\\n출력 형식: '# 제목' 한 줄 → 본문. 머리말·설명·마무리 인사말 금지.\\n규칙: 본문 500자 이상 900자 이내, '## 소제목' 2~3개, 각 소제목 아래 3문장 이상,\\n      정보 전달 위주 문어체(합니다체), 이모지 금지.\\n금지: 환경 효과 과장('완전 무해'·'탄소 제로'), 없는 스펙·수치 창작, 경쟁사 비방.\\n주제: {{1.topic}}\"}]}], \"generationConfig\": {\"temperature\": 0.7}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "x-goog-api-key",
+                    "value": "<REDACTED>"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0,
+                  "name": "AI 텍스트 생성 — 블로그"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            },
+            {
+              "id": 13,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://api.notion.com/v1/pages",
+                "data": "{\"parent\": {\"database_id\": \"3a82f355-a7e2-81e4-a320-fec69e32d481\"}, \"properties\": {\"제목\": {\"title\": [{\"text\": {\"content\": \"{{1.topic}} — 블로그\"}}]}, \"주제\": {\"rich_text\": [{\"text\": {\"content\": \"{{1.topic}}\"}}]}, \"플랫폼\": {\"select\": {\"name\": \"블로그\"}}, \"콘텐츠\": {\"rich_text\": [{\"text\": {\"content\": \"{{replace(12.data.candidates[1].content.parts[1].text; newline; \"\\n\")}}\"}}]}, \"이미지\": {\"files\": [{\"name\": \"hero.png\", \"type\": \"external\", \"external\": {\"url\": \"https://raw.githubusercontent.com/ppungee-maker/codyssey-b2-3-mission/main/images/final/01-main-image-eco-tumbler.png\"}}]}, \"생성일시\": {\"date\": {\"start\": \"{{formatDate(now; \"YYYY-MM-DD\")}}\"}}, \"글자수\": {\"number\": {{length(12.data.candidates[1].content.parts[1].text)}}}}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer <REDACTED>"
+                  },
+                  {
+                    "name": "Notion-Version",
+                    "value": "2022-06-28"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0,
+                  "name": "Notion 저장 — 블로그"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 14,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent",
+                "data": "{\"contents\": [{\"parts\": [{\"text\": \"역할: 소셜 콘텐츠 자동생성 파이프라인의 X(트위터) 텍스트 생성 단계.\\n출력 형식: 게시글 한 덩어리만. 머리말·설명·따옴표·불릿(✅ 등) 금지.\\n규칙: 공백 포함 280자 이내(반드시 준수), 2~3문장, 핵심 정보 1~2가지만,\\n      해시태그 1~2개를 마지막에, 이모지 최대 1개.\\n금지: 환경 효과 과장, 없는 스펙 창작.\\n주제: {{1.topic}}\"}]}], \"generationConfig\": {\"temperature\": 0.7}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "x-goog-api-key",
+                    "value": "<REDACTED>"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 300,
+                  "name": "AI 텍스트 생성 — X"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            },
+            {
+              "id": 15,
+              "mapper": {
+                "ca": "",
+                "qs": [],
+                "url": "https://api.notion.com/v1/pages",
+                "data": "{\"parent\": {\"database_id\": \"3a82f355-a7e2-81e4-a320-fec69e32d481\"}, \"properties\": {\"제목\": {\"title\": [{\"text\": {\"content\": \"{{1.topic}} — X\"}}]}, \"주제\": {\"rich_text\": [{\"text\": {\"content\": \"{{1.topic}}\"}}]}, \"플랫폼\": {\"select\": {\"name\": \"X\"}}, \"콘텐츠\": {\"rich_text\": [{\"text\": {\"content\": \"{{replace(14.data.candidates[1].content.parts[1].text; newline; \"\\n\")}}\"}}]}, \"이미지\": {\"files\": [{\"name\": \"hero.png\", \"type\": \"external\", \"external\": {\"url\": \"https://raw.githubusercontent.com/ppungee-maker/codyssey-b2-3-mission/main/images/final/01-main-image-eco-tumbler.png\"}}]}, \"생성일시\": {\"date\": {\"start\": \"{{formatDate(now; \"YYYY-MM-DD\")}}\"}}, \"글자수\": {\"number\": {{length(14.data.candidates[1].content.parts[1].text)}}}}}",
+                "gzip": true,
+                "method": "post",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer <REDACTED>"
+                  },
+                  {
+                    "name": "Notion-Version",
+                    "value": "2022-06-28"
+                  }
+                ],
+                "timeout": "",
+                "useMtls": false,
+                "authPass": "",
+                "authUser": "",
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "serializeUrl": false,
+                "shareCookies": false,
+                "parseResponse": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "followAllRedirects": false,
+                "rejectUnauthorized": true
+              },
+              "module": "http:ActionSendData",
+              "version": 3,
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 300,
+                  "name": "Notion 저장 — X"
+                }
+              },
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              }
+            }
+          ]
+        }
+      ],
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "플랫폼 3분기"
+        }
+      }
+    }
+  ],
+  "name": "B2-3 소셜 콘텐츠 자동 생성",
+  "metadata": {
+    "zone": "us2.make.com",
+    "instant": true,
+    "version": 1,
+    "designer": {
+      "orphans": []
+    },
+    "scenario": {
+      "dlq": false,
+      "slots": null,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  }
+}

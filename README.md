@@ -12,12 +12,21 @@
 
 **사용 도구**
 
+**도구는 "프롬프트 개발용" 과 "자동화 운영용" 을 나눠 적습니다.** 둘을 섞어 적으면
+"Make 에서 네이토를 어떻게 불렀나" 같은 모순이 생기기 때문입니다.
+
 | 무엇 | 도구 | 왜 이걸 골랐나 |
 |---|---|---|
-| 텍스트 생성 AI | **네이토 챗**(코디세이 학습앱 내장, 백엔드 `gemini-3-flash`) | 학습 계정에 이미 포함돼 **추가 결제 없이** 실습 가능. OpenAI/Claude API 로 바꿔도 프롬프트는 그대로 쓸 수 있음 |
+| 텍스트 생성 AI — **프롬프트 개발** | **네이토 챗**(코디세이 학습앱 내장, 백엔드 `gemini-3-flash`) | 학습 계정에 포함돼 **추가 결제 없이** 초안→최종 개선을 반복할 수 있음. 결과 전문 = [`outputs/01~04`](outputs/) |
+| 텍스트 생성 AI — **자동화 운영** | **Gemini API** (`gemini-flash-lite-latest`) | ⚠️ **네이토는 Make 에서 호출할 수 없습니다** — 인증이 `JSESSIONID` 세션 쿠키 + IP 허용목록이라 API 키가 존재하지 않습니다. 그래서 실연동만 API 키로 부를 수 있는 모델로 바꾸고 **프롬프트는 §5 최종본을 글자 그대로** 사용했습니다 |
 | 이미지 생성 AI | **네이토 이미지**(백엔드 `gpt-image-1-mini`) | 같은 계정에서 텍스트·이미지를 다 처리해 툴 개수를 줄임 |
-| 자동화(워크플로우) | **Make**(예정) | 노코드 + 무료 플랜으로 월 1,000 오퍼레이션. Zapier 보다 분기(Router)가 직관적 |
-| 저장 | **Notion**(예정) | 팀원이 링크 하나로 같이 보기 쉬움. DB 속성 타입이 명확해 자동 저장 매핑이 쉬움 |
+| 자동화(워크플로우) | **Make** ✅ 구축·실행 완료 | 노코드 + 무료 플랜으로 월 1,000 오퍼레이션. Zapier 보다 분기(Router)가 직관적 |
+| 저장 | **Notion** ✅ 연동 완료 | 팀원이 링크 하나로 같이 보기 쉬움. DB 속성 타입이 명확해 자동 저장 매핑이 쉬움 |
+
+> **왜 Notion 을 Make 의 Notion 모듈이 아니라 `HTTP` 모듈로 붙였나요?**
+> Make 의 Notion 앱 모듈은 OAuth 로그인 화면을 거쳐야 연결됩니다. 이 워크플로우는 **전 과정을
+> API 로 구성**했기 때문에, 브라우저 로그인이 필요 없는 **Notion REST API 직접 호출**(`HTTP > Make a
+> request` + 내부 통합 토큰)을 골랐습니다. 저장되는 결과는 완전히 동일합니다.
 
 > ⚠️ **정직한 진행 상태 표기**
 > 이 문서는 **실제로 한 것**과 **아직 안 한 것**을 섞어 쓰지 않습니다.
@@ -28,8 +37,9 @@
 > | 플랫폼별 텍스트 3종 실제 생성(초안→최종) | ✅ [`outputs/`](outputs/) 에 응답 원문 |
 > | 대표 이미지 + 보너스 A/B 이미지 실제 생성 | ✅ [`images/`](images/) |
 > | 보너스1 A/B 텍스트 2버전 + 결론 | ✅ [`outputs/04-ab-test-2026-07-25.md`](outputs/04-ab-test-2026-07-25.md) |
-> | Make 시나리오 실제 구축·실행 | 🔧 **담당 황지영** — 지시서 [`captures/make/README.md`](captures/make/README.md) |
-> | Notion DB 실제 저장·공유 | 🔧 **담당 황지영** — 지시서 [`captures/make/README.md`](captures/make/README.md) |
+> | Make 시나리오 실제 구축·실행 | ✅ 모듈 8개 · 성공 실행 4회 — 구조 [`captures/make/scenario-blueprint.json`](captures/make/scenario-blueprint.json) · 실행 기록 [`captures/make/run-history.json`](captures/make/run-history.json) |
+> | 자동화가 만든 결과물 | ✅ [`outputs/05-automation-run-2026-07-26.md`](outputs/05-automation-run-2026-07-26.md) — 사람 개입 0의 실행 결과 + 규격 대조 |
+> | Notion DB 실제 저장·공유 | ✅ 행 8개 저장 — **협업 페이지** https://app.notion.com/p/B2-3-AI-3a82f355a7e281c2ae92d3cd8764c2ff |
 
 ---
 
@@ -215,38 +225,66 @@ aesthetic, no text anywhere in the image
 
 ## 6. Notion 저장 구조 (플랫폼별 구분 저장)
 
+**실제로 만들어진 DB 의 속성 8개입니다** (문서와 실물을 일치시키기 위해 실제 스키마를 적습니다):
+
 | 속성명 | 타입 | 무엇이 들어가나 | 왜 이 타입인가 |
 |---|---|---|---|
-| 주제 | Title | `친환경 텀블러 신제품 출시…` | Notion DB 는 Title 이 필수 1개. 검색·정렬 기준이 됨 |
+| 제목 | Title | `{주제} — {플랫폼}` | Notion DB 는 Title 이 필수 1개. **주제를 Title 로 두면 행 3개의 이름이 전부 같아져** 목록에서 구분이 안 됨 |
+| 주제 | Text | `친환경 텀블러 신제품 출시…` | 주제로 묶어 보려면 필터가 걸리는 별도 열이어야 함 |
 | 플랫폼 | Select | `인스타그램` / `블로그` / `X` | 자유 입력(Text)으로 두면 '트위터'·'X'·'x' 가 섞여 필터가 깨짐 |
 | 콘텐츠 | Text | 생성된 본문 전체 | 길이 제한이 넉넉하고 줄바꿈 보존 |
 | 이미지 | Files & media | 대표 이미지 | URL(Text)로 두면 미리보기가 안 뜸 |
 | 생성일시 | Date | 자동화 실행 시각 | 같은 주제를 재생성했을 때 버전 구분 |
-| 톤(보너스) | Select | `A-친근` / `B-전문` | A/B 테스트 결과를 같은 표에서 비교하기 위함 |
+| 글자수 | Number | 본문 길이 | 플랫폼별 글자수 제약(280자 등) 위반을 **표에서 바로** 걸러내기 위함 |
+| 톤 | Select | `A-친근` / `B-전문` | A/B 테스트 결과를 같은 표에서 비교하기 위함(보너스1) |
 
 **행을 3개 만드는 이유**: 한 행에 3플랫폼을 다 넣으면 "인스타만 보기" 필터가 불가능합니다.
 **플랫폼 = 행**, **속성 = 열** 로 쪼개는 것이 나중에 관리가 편합니다.
 
+> **자동화에서 걸린 함정 — 줄바꿈이 JSON 을 깨뜨린다.**
+> AI 응답에는 줄바꿈이 들어 있는데, 그걸 그대로 JSON 본문에 꽂으면 Notion 이
+> `invalid_json` 400 을 냅니다(JSON 문자열 안에는 실제 줄바꿈 문자를 넣을 수 없기 때문).
+> Make 수식 `replace(<본문>; newline; "\n")` 으로 **줄바꿈을 이스케이프 문자열로 바꿔서** 해결했습니다.
+> (Make 의 `replace()` 는 정규식 리터럴 `/\n/g` 을 조용히 무시합니다 — 오류도 안 나고 치환도 안 되니
+> 내장 키워드 `newline` 을 써야 합니다. 변형 6종을 실제로 돌려 확인한 값입니다.)
+
 ---
 
-## 7. 남은 실연동 체크리스트 (여기만 채우면 100% 완료)
+## 7. 실연동 구성 — 실제로 만든 것과 재현 방법
 
-아래는 **계정 로그인이 필요해 문서로 대체할 수 없는** 항목입니다. 순서대로 하면 30~40분 걸립니다.
+**전 과정을 API 로 구성했습니다.** 브라우저에서 모듈을 끌어다 놓지 않고, Make API 로 시나리오
+청사진(blueprint)을 업로드해 만들었습니다. 그래서 이 워크플로우는 **파일로 재현 가능**합니다 —
+`captures/make/scenario-blueprint.json` 을 Make 에 가져오면 같은 구조가 그대로 만들어집니다.
 
-- [ ] **Make 시나리오 만들기**
-  1. Make → Create a new scenario → 첫 모듈로 `Webhooks > Custom webhook` 추가 → 주소 복사
-  2. `Router` 추가 → 갈래 3개 만들기
-  3. 각 갈래에 `HTTP > Make a request` 추가 → 위 §5-1/5-2/5-3 프롬프트를 body 에 넣기
-  4. `Notion > Create a Database Item` 추가 → §6 속성에 매핑
-  5. 우측 하단 `Scheduling` 을 **ON** → 저장
-  6. 실행 후 **시나리오 전체 화면을 캡처**해 `captures/make/01-scenario.png` 로 저장
-- [ ] **Notion DB 만들고 공유**
-  1. 새 페이지 → `/database - full page` → §6 표대로 속성 6개 생성
-  2. 우측 상단 `···` → `Connections` → 만든 Integration 연결
-  3. 팀원 초대(공유 링크) → **DB 화면 캡처**를 `captures/notion/01-db.png` 로 저장
-- [ ] 실행 결과 링크를 이 README 맨 위 표에 적기 (Notion 공유 링크 1줄)
+### 7-1. 실제 구성 (모듈 8개)
 
-> 캡처 파일만 저장소에 올라오면 아래 §8 대조표의 🔧 항목이 자동으로 ✅ 로 바뀝니다.
+| # | 모듈 | 역할 |
+|---|---|---|
+| 1 | `Webhooks > Custom webhook` | `{"topic": "..."}` 를 받는 트리거 |
+| 2 | `Tools > Set variable` (`대표이미지`) | 대표 이미지 URL 을 **Router 밖에서 1회만** 정의 → 3갈래가 공유 |
+| 3 | `Router` | 인스타그램 / 블로그 / X 3분기 |
+| 4·6·8 | `HTTP > Make a request` → Gemini API | 갈래별로 §5-1/5-2/5-3 **최종 프롬프트** + `{{1.topic}}` |
+| 5·7·9 | `HTTP > Make a request` → Notion REST API | §6 속성에 매핑해 행 1개씩 생성 |
+
+### 7-2. 실행 증빙
+
+| 무엇 | 어디 |
+|---|---|
+| 시나리오 구조(모듈·연결·매핑 전문, API 키는 마스킹) | [`captures/make/scenario-blueprint.json`](captures/make/scenario-blueprint.json) |
+| 실행 이력(시각·성공여부·오퍼레이션 수·소요시간) | [`captures/make/run-history.json`](captures/make/run-history.json) |
+| 자동화가 만든 결과물 + 규격 대조 | [`outputs/05-automation-run-2026-07-26.md`](outputs/05-automation-run-2026-07-26.md) |
+| Notion 협업 페이지(개요·역할·작업 요약·DB) | https://app.notion.com/p/B2-3-AI-3a82f355a7e281c2ae92d3cd8764c2ff |
+
+성공 실행은 **8 오퍼레이션 / 약 4.6초**로 끝나고, 한 번에 Notion 행 3개가 생깁니다.
+
+### 7-3. 직접 재현하려면
+
+1. Notion → `notion.so/my-integrations` 에서 **내부 통합** 생성 → 토큰 확보 → DB 가 놓일 부모
+   페이지의 `···` → `Connections` 에 그 통합을 추가 (하위 페이지·DB 는 권한을 상속합니다)
+2. Google AI Studio(`aistudio.google.com`)에서 **무료 API 키** 발급
+3. Make → `Create a new scenario` → 우하단 `...` → **Import Blueprint** 로 위 JSON 업로드
+4. 두 HTTP 모듈의 `<REDACTED>` 자리에 각자의 키를 넣기 (**저장소·캡처에는 절대 남기지 않습니다**)
+5. 시나리오를 **ON** 으로 두고 웹훅 주소에 `{"topic": "원하는 주제"}` 를 POST
 
 ---
 
@@ -256,10 +294,10 @@ aesthetic, no text anywhere in the image
 
 | # | 평가기준 | 답변 위치 | 상태 |
 |---|---|---|---|
-| 1 | 기능 동작 검증 — 주제 입력 시 자동화 워크플로우가 정상 실행되는가? | §4 구조 + §7 Make 체크리스트 | 🔧 실행 캡처 필요 |
+| 1 | 기능 동작 검증 — 주제 입력 시 자동화 워크플로우가 정상 실행되는가? | §7-2 실행 이력([`run-history.json`](captures/make/run-history.json), 성공 4회·8 오퍼레이션) + 그 결과물([`outputs/05`](outputs/05-automation-run-2026-07-26.md)) | ✅ |
 | 2 | 기능 동작 검증 — 최소 3개 플랫폼에 맞는 텍스트가 생성되었는가? | [`outputs/01`](outputs/01-instagram-2026-07-25.md)·[`02`](outputs/02-blog-2026-07-25.md)·[`03`](outputs/03-x-2026-07-25.md) 실응답 원문 | ✅ |
 | 3 | 기능 동작 검증 — 콘텐츠 주제에 맞는 이미지가 생성되었는가? | `images/final/01-main-image-eco-tumbler.png` | ✅ |
-| 4 | 기능 동작 검증 — 결과물이 노션 등에 저장되어 팀원끼리 공유되고 있는가? | §6 설계 + §7 Notion 체크리스트 | 🔧 공유 링크 필요 |
+| 4 | 기능 동작 검증 — 결과물이 노션 등에 저장되어 팀원끼리 공유되고 있는가? | [협업 페이지](https://app.notion.com/p/B2-3-AI-3a82f355a7e281c2ae92d3cd8764c2ff) — 프로젝트 개요·팀 역할·개인별 작업 요약 + `소셜 콘텐츠` DB(행 8개, 플랫폼별 구분 저장) | ✅ |
 | 5 | 동작 구조 및 설계 — 자동화 워크플로우가 어떻게 설계되었는지 설명할 수 있는가? | §4(단계별 역할·연결 표 + 이미지 1회 호출 근거) | ✅ |
 | 6 | 동작 구조 및 설계 — 톤앤매너를 플랫폼별로 어떻게 다르게 제어했는지 설명할 수 있는가? | §5-1~5-3 각 규칙절 + [`outputs/04`](outputs/04-ab-test-2026-07-25.md) A/B 비교표 | ✅ |
 | 7 | 핵심 기술 원리 — 원하는 스타일의 이미지를 얻기 위해 프롬프트를 어떻게 설계했는지 | §5-4 4축 표(특히 `no text` 지시 근거) | ✅ |
@@ -296,6 +334,10 @@ X 는 B안을 더 줄인 형태가 맞습니다. 이미지도 같은 축으로 �
 | 이미지 속 글자가 뭉개진다 | 이미지 AI 의 구조적 한계 | 프롬프트에 `no text anywhere in the image` 로 **글자 자체를 배제** |
 | 과장 광고 문구가 섞인다 | AI 의 기본 성향(칭찬) | **금지 목록**을 프롬프트에 명시 |
 | 명령줄에서 AI 호출이 멈춘 것처럼 보인다 | 표준입력(stdin)이 열린 채 대기 | 호출 끝에 `< /dev/null` 을 붙여 입력을 닫아준다 |
+| Notion 저장이 `invalid_json` 400 으로 실패한다 | AI 응답의 **줄바꿈**이 JSON 문자열을 깨뜨림 | Make 수식 `replace(<본문>; newline; "\n")` 으로 이스케이프 |
+| 위 `replace()` 를 넣었는데도 그대로 실패한다 | Make 의 `replace()` 는 **정규식 리터럴(`/\n/g`)을 조용히 무시**한다 | 내장 키워드 `newline`·`space`·`emptystring` 을 쓴다 |
+| AI 호출이 `429 RESOURCE_EXHAUSTED` | 무료 티어 **일일 한도는 모델마다 다르다**(최신 별칭일수록 좁아 20건인 경우도) | 한도가 넉넉한 모델로 교체 — 쿼터는 **모델별 버킷**이라 바꾸면 즉시 풀린다 |
+| Make API 가 `403 error code: 1010` | 무료 플랜 제한이 아니라 **Cloudflare 의 클라이언트 차단** | 요청에 평범한 브라우저 `User-Agent` 헤더를 붙인다 |
 
 ---
 
@@ -304,7 +346,7 @@ X 는 B안을 더 줄인 형태가 맞습니다. 이미지도 같은 축으로 �
 | 역할 | 담당 | 구체적으로 한 일 |
 |---|---|---|
 | 프로젝트 총괄·의사결정 | 황지영 | 주제 선정(한밭보틀), 플랫폼 3종 확정 |
-| 실연동(Make·Notion) | 황지영 | 시나리오 구축·실행 증빙, DB 생성·공유 — 지시서 [`captures/make/README.md`](captures/make/README.md) |
+| 실연동(Make·Notion) | 오주현 + Claude | Make·Google AI Studio 계정 준비와 토큰 발급(오주현), Make API 로 시나리오 구축·실행·검증과 Notion DB·협업 페이지 생성(Claude) |
 | 워크플로우 설계 | 황지영 + Claude | 트리거→Router 3분기→이미지 1회→저장 구조 확정, 비용 절감 근거 정리 |
 | 프롬프트 설계·개선 | Claude | 플랫폼 3종 프롬프트 초안→최종 개선, 금지 목록 설계, 규격 자동 측정 |
 | 콘텐츠 생성·검증 | Claude | 네이토 챗 8회 호출로 텍스트 6종 + A/B 2종 실제 생성, 자수·태그수 검증 |
